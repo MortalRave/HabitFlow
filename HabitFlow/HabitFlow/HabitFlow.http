@@ -1,0 +1,6 @@
+@HabitFlow_HostAddress = http://localhost:5036
+
+GET {{HabitFlow_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
