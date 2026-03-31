@@ -22,4 +22,12 @@ public class HabitsController : ControllerBase
         var habits = await _context.Habits.ToListAsync();
         return Ok(habits);
     }
+
+    [HttpPost]
+    public async Task<ActionResult<Habit>> CreateHabit(Habit habit)
+    {
+        _context.Habits.Add(habit);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(GetHabits), new { id = habit.Id }, habit);
+    }
 }
