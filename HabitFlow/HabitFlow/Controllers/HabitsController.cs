@@ -44,4 +44,22 @@ public class HabitsController : ControllerBase
         return NoContent();
 
     }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> UpdateHabit(int id, Habit updatedHabit)
+    {
+        if (id != updatedHabit.Id) return BadRequest();
+
+        var existingHabit = await _context.Habits.FindAsync(id);
+        if (existingHabit == null) return NotFound();
+
+        existingHabit.Name = updatedHabit.Name;
+        existingHabit.Description = updatedHabit.Description;
+        existingHabit.StreakCount = updatedHabit.StreakCount;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
 }
