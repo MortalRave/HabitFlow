@@ -60,6 +60,12 @@ class _HabitScreenState extends State<HabitScreen> {
       appBar: AppBar(
         title: const Text('Moje nawyki'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: fetchHabits,
+          )
+        ]
       ),
       body: habits.isEmpty
           ? const Center(child: Text('Brak nawyków! Dodaj nowy nawyk'))
