@@ -85,6 +85,12 @@ class _HabitScreenState extends State<HabitScreen> {
               );
             },
           ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              print('Future new habbit button');
+            },
+            child: const Icon(Icons.add),
+          ),
     );
   }
 }
