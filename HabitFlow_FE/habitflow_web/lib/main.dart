@@ -73,11 +73,15 @@ class _HabitScreenState extends State<HabitScreen> {
             itemCount: habits.length,
             itemBuilder: (context, index) {
               final habit = habits[index];
-              return ListTile(
-                leading: const Icon(Icons.check_circle_outline),
-                title: Text(habit['name'] ?? 'Brak nazwy'),
-                subtitle: Text(habit['description'] ?? ''),
-                trailing: Text('🔥${habit['streakCount'] ?? 0}'),
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                elevation: 2,
+                child: ListTile(
+                  leading: const Icon(Icons.check_circle_outline, color: Colors.deepPurple),
+                  title: Text(habit['name'] ?? 'Brak nazwy'),
+                  subtitle: Text(habit['description'] ?? ''),
+                  trailing: Text('🔥 ${habit['streakCount'] ?? 0}'),
+                ),
               );
             },
           ),
