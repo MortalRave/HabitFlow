@@ -62,4 +62,16 @@ public class HabitsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id}/complete")]
+    public async Task<ActionResult> MarkAsCompleted(int id)
+    {
+        var habit = await _context.Habits.FindAsync(id);
+        if (habit == null) return NotFound();
+
+        bool success = habit.MarkAsCompleted();
+        if (!success) return BadRequest("This habit has been done today!");
+        await _context.SaveChangesAsync();
+
+        return Ok(habit);
+    }
 }
