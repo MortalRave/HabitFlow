@@ -18,4 +18,20 @@ public class Habit
 	{
 	}
 
+	public bool MarkAsCompleted()
+	{
+		var today = DateTime.Today;
+
+		if (IsCompletedToday && LastCompletedDate == today) return false;
+
+		else if (LastCompletedDate == today.AddDays(-1)) StreakCount += 1;
+
+		else StreakCount = 1;
+
+		LastCompletedDate = today;
+		IsCompletedToday = true;
+
+		return true;
+	}
+
 }
