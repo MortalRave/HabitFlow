@@ -79,6 +79,32 @@ class _HabitScreenState extends State<HabitScreen> {
     }
   }
 
+  Future<void> _completeHabit(int id) async {
+    final url = Uri.parse('https://localhost:7185/api/habits/$id/complete');
+    
+    try {
+      final response = await http.post(url);
+
+      if (response.statusCode == 200) {
+        fetchHabits();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Habit marked as done! 🎉')),
+          );
+        }
+      } else if (response.statusCode == 400) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('This habit has already been done!')),
+          );
+        }
+      }
+    } catch (e) {
+      print('API connection error: &e');
+    }
+  }
+
   Future<void> _showAddHabitDialog() async {
     final nameController = TextEditingController();
     final descController = TextEditingController();
@@ -142,7 +168,19 @@ class _HabitScreenState extends State<HabitScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 elevation: 2,
                 child: ListTile(
-                  leading: const Icon(Icons.check_circle_outline, color: Colors.deepPurple),
+                  leading: IconButton(
+                    icon: Icon(
+                      habit['isCompletedToday'] == true
+                        ? Icons.check_circle
+                        : Icons.check_circle_outline,
+                      color: habit['isCompletedToday'] == true
+                        ? Colors.green
+                        : Colors.grey,
+                    ),
+                    onPressed: () {
+                      _completeHabit(habit['id']);
+                    },
+                  ),
                   title: Text(habit['name'] ?? 'Brak nazwy'),
                   subtitle: Text(habit['description'] ?? ''),
                   trailing: Text('🔥 ${habit['streakCount'] ?? 0}'),
