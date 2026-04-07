@@ -54,6 +54,71 @@ class _HabitScreenState extends State<HabitScreen> {
     }
   }
 
+  Future<void> _createNewHabit(String name, String description) async {
+    if (name.isEmpty) return;
+
+    final url = Uri.parse('https://localhost:7185/api/habits');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'name': name,
+          'description': description,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        fetchHabits();
+      } else{
+        print('Addition error. Server code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API connection error: $e');
+    }
+  }
+
+  Future<void> _showAddHabitDialog() async {
+    final nameController = TextEditingController();
+    final descController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add new habit'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Habit\' name'),
+              ),
+              TextField(
+                controller: descController,
+                decoration: const InputDecoration(labelText: 'Description (optional)'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _createNewHabit(nameController.text, descController.text);
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,9 +151,8 @@ class _HabitScreenState extends State<HabitScreen> {
             },
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              print('Future new habbit button');
-            },
+            onPressed: _showAddHabitDialog,
+            tooltip: 'Add new habit',
             child: const Icon(Icons.add),
           ),
     );
