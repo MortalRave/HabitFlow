@@ -79,6 +79,54 @@ class _HabitScreenState extends State<HabitScreen> {
     }
   }
 
+  Future<void> _deleteHabit(int id) async {
+    final url = Uri.parse('https://localhost:7185/api/habits/$id');
+
+    try {
+      final response = await http.delete(url);
+
+      if (response.statusCode == 204) {
+        fetchHabits();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Habit has been deleted.')),
+          );
+        }
+      } else {
+        print('Deleting error: Code: ${response.statusCode}');
+      }
+    }
+    catch (e) {
+      print('API connection error: $e');
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(int id, String name) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Deleting habit'),
+          content: Text('Are you sure you want to delete "$name" habit?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _deleteHabit(id);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _completeHabit(int id) async {
     final url = Uri.parse('https://localhost:7185/api/habits/$id/complete');
     
@@ -183,7 +231,24 @@ class _HabitScreenState extends State<HabitScreen> {
                   ),
                   title: Text(habit['name'] ?? 'Brak nazwy'),
                   subtitle: Text(habit['description'] ?? ''),
-                  trailing: Text('🔥 ${habit['streakCount'] ?? 0}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '🔥 ${habit['streakCount'] ?? 0}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () {
+                          _showDeleteConfirmation(
+                            habit['id'],
+                            habit['name'] ?? 'No name'
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
