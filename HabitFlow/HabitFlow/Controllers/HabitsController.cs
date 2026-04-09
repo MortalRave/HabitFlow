@@ -20,6 +20,23 @@ public class HabitsController : ControllerBase
     public async Task<ActionResult<IEnumerable<Habit>>> GetHabits()
     {
         var habits = await _context.Habits.ToListAsync();
+
+        var today = DateTime.Today;
+        bool hasChanges = false;
+
+        foreach (var habit in habits)
+        {
+            if (habit.IsCompletedToday && habit.LastCompletedDate != today)
+            {
+                habit.IsCompletedToday = false;
+                hasChanges = true;
+            }
+        }
+        if (hasChanges)
+        {
+            await _context.SaveChangesAsync();
+        }
+
         return Ok(habits);
     }
 
