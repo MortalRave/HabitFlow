@@ -101,6 +101,75 @@ class _HabitScreenState extends State<HabitScreen> {
     }
   }
 
+  Future<void> _updateHabit(int id, String newName, String newDesc, dynamic existingHabit) async {
+    final url = Uri.parse('https://localhost:7185/api/habits/$id');
+
+    final updatedData = Map<String, dynamic>.from(existingHabit);
+    updatedData['name'] = newName;
+    updatedData['description'] = newDesc;
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(updatedData),
+      );
+
+      if (response.statusCode == 204) {
+        fetchHabits();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Habit updated')),
+          );
+        }
+      } else {
+        print('Edditing error. Server code ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API connection error: $e');
+    }
+  }
+
+  Future<void> _showEditDialog(dynamic habit) async {
+    final nameController = TextEditingController(text: habit['name']);
+    final descController = TextEditingController(text: habit['description']);
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit habit'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Habit\'s name'),
+              ),
+              TextField(
+                controller: descController,
+                decoration: const InputDecoration(labelText: 'Description (optional)'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _updateHabit(habit['id'], nameController.text, descController.text, habit);
+                Navigator.pop(context);
+              },
+              child: const Text('Save changes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _showDeleteConfirmation(int id, String name) async {
     return showDialog(
       context: context,
@@ -229,8 +298,9 @@ class _HabitScreenState extends State<HabitScreen> {
                       _completeHabit(habit['id']);
                     },
                   ),
-                  title: Text(habit['name'] ?? 'Brak nazwy'),
+                  title: Text(habit['name'] ?? 'No name'),
                   subtitle: Text(habit['description'] ?? ''),
+                  onTap: () => _showEditDialog(habit),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
